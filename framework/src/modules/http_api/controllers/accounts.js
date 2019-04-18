@@ -104,6 +104,7 @@ AccountsController.getAccounts = async function(context, next) {
 		limit: params.limit.value,
 		offset: params.offset.value,
 		sort: params.sort.value,
+		extended: false,
 	};
 
 	// Remove filters with null values
@@ -122,7 +123,7 @@ AccountsController.getAccounts = async function(context, next) {
 				lastBlock.height
 					? await channel.invoke('chain:calculateSupply', {
 							height: lastBlock.height,
-						})
+					  })
 					: 0
 			)
 		);

@@ -438,8 +438,9 @@ class Account extends BaseEntity {
 			)
 			.then(resp => {
 				const parseResponse = account => {
-					// TODO: Always show or only when parsedOptions.extended=true
-					account.data = account.data ? account.data : {};
+					if (parsedOptions.extended) {
+						account.data = account.data ? account.data : {};
+					}
 					return account;
 				};
 

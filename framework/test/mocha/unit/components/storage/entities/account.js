@@ -110,6 +110,7 @@ describe('Account', () => {
 			'u_votedDelegatesPublicKeys',
 			'membersPublicKeys',
 			'u_membersPublicKeys',
+			'data',
 		];
 
 		validSimpleObjectFields = [

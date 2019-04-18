@@ -54,6 +54,7 @@ const validAccount = {
 	u_membersPublicKeys: null,
 	votedDelegatesPublicKeys: null,
 	u_votedDelegatesPublicKeys: null,
+	data: null,
 };
 
 describe('account', () => {

@@ -69,6 +69,7 @@ accounts.mem_accountsFields = [
 	'missedBlocks',
 	'fees',
 	'rewards',
+	'data',
 ];
 
 const Account = stampit({
@@ -166,6 +167,7 @@ const dbAccount = stampit({
 		u_username: null,
 		username: null,
 		vote: '0',
+		data: null,
 	},
 	init({ address, balance, u_balance }) {
 		this.address = address || this.address;

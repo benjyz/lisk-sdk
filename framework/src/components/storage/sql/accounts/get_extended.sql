@@ -36,6 +36,7 @@ SELECT
 	"u_multimin" as "u_multiMin",
 	"u_multilifetime" as "u_multiLifetime",
 	"u_balance",
+	"data",
 	case
     when
     	"producedBlocks" + "missedBlocks" = 0 then 0
