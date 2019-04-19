@@ -107,7 +107,7 @@ try {
 
 	app
 		.run()
-		.then(() => app.logger.log('App started...'))
+		.then(() => app.logger.info('App started...'))
 		.catch(error => {
 			if (error instanceof Error) {
 				app.logger.error('App stopped with error', error.message);
@@ -118,6 +118,6 @@ try {
 			process.exit();
 		});
 } catch (e) {
-	console.error('Application start error.', e.errors);
+	console.error('Application start error.', e);
 	process.exit();
 }
