@@ -278,6 +278,9 @@ module.exports = {
 					http_api: {
 						type: 'object',
 					},
+					network: {
+						type: 'object',
+					},
 				},
 			},
 		},

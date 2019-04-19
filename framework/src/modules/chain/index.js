@@ -36,6 +36,7 @@ module.exports = class ChainModule extends BaseModule {
 	get events() {
 		return [
 			'blocks:change',
+			'ready',
 			'signature:change',
 			'transactions:change',
 			'rounds:change',
@@ -57,9 +58,6 @@ module.exports = class ChainModule extends BaseModule {
 				this.chain.actions.generateDelegateList(action),
 			updateForgingStatus: async action =>
 				this.chain.actions.updateForgingStatus(action),
-			getPeers: async action => this.chain.actions.getPeers(action),
-			getPeersCountByFilter: async action =>
-				this.chain.actions.getPeersCountByFilter(action),
 			postSignature: async action => this.chain.actions.postSignature(action),
 			getLastConsensus: async () => this.chain.actions.getLastConsensus(),
 			loaderLoaded: async () => this.chain.actions.loaderLoaded(),
@@ -71,6 +69,8 @@ module.exports = class ChainModule extends BaseModule {
 				this.chain.actions.getForgersPublicKeys(),
 			getTransactionsFromPool: async action =>
 				this.chain.actions.getTransactionsFromPool(action),
+			getTransactions: async () => this.chain.actions.getTransactions(),
+			getSignatures: async () => this.chain.actions.getSignatures(),
 			getLastCommit: async () => this.chain.actions.getLastCommit(),
 			getBuild: async () => this.chain.actions.getBuild(),
 			postTransaction: async action =>
@@ -80,6 +80,8 @@ module.exports = class ChainModule extends BaseModule {
 			getSlotNumber: async action => this.chain.actions.getSlotNumber(action),
 			calcSlotRound: async action => this.chain.actions.calcSlotRound(action),
 			getNodeStatus: async () => this.chain.actions.getNodeStatus(),
+			blocks: async action => this.chain.actions.blocks(action),
+			blocksCommon: async action => this.chain.actions.blocksCommon(action),
 		};
 	}
 
@@ -88,6 +90,7 @@ module.exports = class ChainModule extends BaseModule {
 
 		channel.once('app:ready', async () => {
 			await this.chain.bootstrap();
+			channel.publish('chain:ready');
 		});
 	}
 

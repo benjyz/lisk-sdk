@@ -82,7 +82,8 @@ class Blocks {
 				scope.components.storage,
 				scope.sequence,
 				scope.genesisBlock,
-				scope.logic.initTransaction
+				scope.logic.initTransaction,
+				scope.channel
 			),
 			utils: new BlocksUtils(
 				scope.components.logger,

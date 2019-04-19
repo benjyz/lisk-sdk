@@ -12,11 +12,9 @@ const { createStorageComponent } = require('../../components/storage');
 const { createCacheComponent } = require('../../components/cache');
 const { createLoggerComponent } = require('../../components/logger');
 const {
-	lookupPeerIPs,
 	createBus,
 	bootstrapStorage,
 	bootstrapCache,
-	createSocketCluster,
 	initLogicStructure,
 	initModules,
 } = require('./init_steps');
@@ -164,24 +162,7 @@ module.exports = class Chain {
 			scope.logic = await initLogicStructure(scope);
 			scope.modules = await initModules(scope);
 
-			if (scope.config.network.enabled) {
-				// Lookup for peers ips from dns
-				scope.config.network.list = await lookupPeerIPs(
-					scope.config.network.list,
-					scope.config.network.enabled
-				);
-
-				// Listen to websockets
-				scope.webSocket = await createSocketCluster(scope);
-				await scope.webSocket.listen();
-			} else {
-				this.logger.info(
-					'Skipping P2P server initialization due to the config settings - "peers.enabled" is set to false.'
-				);
-			}
-
 			// Ready to bind modules
-			scope.logic.peers.bindModules(scope.modules);
 			scope.logic.block.bindModules(scope.modules);
 
 			this.channel.subscribe('app:state:updated', event => {
@@ -192,6 +173,20 @@ module.exports = class Chain {
 			scope.bus.message('bind', scope);
 
 			self.logger.info('Modules ready and launched');
+
+			this.channel.once('network:ready', () => {
+				this.channel.subscribe('network:chain:postTransactions', ({ data }) => {
+					this.scope.modules.transport.shared.postTransactions(data);
+				});
+
+				this.channel.subscribe('network:chain:postSignatures', ({ data }) => {
+					this.scope.modules.transport.shared.postSignatures(data);
+				});
+
+				this.channel.subscribe('network:chain:postBlock', ({ data }) => {
+					this.scope.modules.transport.shared.postBlock(data);
+				});
+			});
 
 			self.scope = scope;
 		} catch (error) {
@@ -222,14 +217,10 @@ module.exports = class Chain {
 					action.params.password,
 					action.params.forging
 				),
-			getPeers: async action =>
-				promisify(this.scope.modules.peers.shared.getPeers)(
-					action.params.parameters
-				),
-			getPeersCountByFilter: async action =>
-				this.scope.modules.peers.shared.getPeersCountByFilter(
-					action.params.parameters
-				),
+			getTransactions: async () =>
+				promisify(this.scope.modules.transport.shared.getTransactions)(),
+			getSignatures: async () =>
+				promisify(this.scope.modules.transport.shared.getSignatures)(),
 			postSignature: async action =>
 				promisify(this.scope.modules.signatures.shared.postSignature)(
 					action.params.signature
@@ -277,13 +268,16 @@ module.exports = class Chain {
 					this.scope.modules.transactions.shared.getTransactionsCount
 				)(),
 				secondsSinceEpoch: this.slots.getTime(),
-				networkHeight: await promisify(this.scope.modules.peers.networkHeight)({
-					options: {
-						normalized: false,
-					},
-				}),
 				lastBlock: this.scope.modules.blocks.lastBlock.get(),
 			}),
+			blocks: async action =>
+				promisify(this.scope.modules.transport.shared.blocks)(
+					action.params || {}
+				),
+			blocksCommon: async action =>
+				promisify(this.scope.modules.transport.shared.blocksCommon)(
+					action.params || {}
+				),
 		};
 	}
 

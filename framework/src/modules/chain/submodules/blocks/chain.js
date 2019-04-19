@@ -675,10 +675,6 @@ Chain.prototype.deleteLastBlock = function(cb) {
 					})
 					.catch(seriesCb);
 			},
-			broadcastHeaders(seriesCb) {
-				// Notify all remote peers about our new headers
-				modules.transport.broadcastHeaders(seriesCb);
-			},
 			addDeletedTransactions(seriesCb) {
 				// Put transactions back into transaction pool
 				modules.transactions.onDeletedTransactions(deletedBlockTransactions);
@@ -725,7 +721,6 @@ Chain.prototype.onBind = function(scope) {
 		blocks: scope.modules.blocks,
 		rounds: scope.modules.rounds,
 		transactions: scope.modules.transactions,
-		transport: scope.modules.transport,
 		processTransactions: scope.modules.processTransactions,
 	};
 

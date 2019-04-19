@@ -1,15 +1,12 @@
 module.exports = async ({
-	config,
 	ed,
 	schema,
 	components: { storage, logger },
-	applicationState,
 	registeredTransactions,
 }) => {
 	const InitTransaction = require('../logic/init_transaction.js');
 	const Block = require('../logic/block.js');
 	const Account = require('../logic/account.js');
-	const Peers = require('../logic/peers.js');
 	const StateManager = require('../logic/state_store/index.js');
 
 	const accountLogic = await new Promise((resolve, reject) => {
@@ -26,12 +23,6 @@ module.exports = async ({
 		});
 	});
 
-	const peersLogic = await new Promise((resolve, reject) => {
-		new Peers(logger, config, applicationState, (err, object) => {
-			err ? reject(err) : resolve(object);
-		});
-	});
-
 	const stateManager = await new Promise((resolve, reject) => {
 		new StateManager(storage, (err, object) => {
 			err ? reject(err) : resolve(object);
@@ -42,7 +33,6 @@ module.exports = async ({
 		account: accountLogic,
 		initTransaction: initTransactionLogic,
 		block: blockLogic,
-		peers: peersLogic,
 		stateManager,
 	};
 };
