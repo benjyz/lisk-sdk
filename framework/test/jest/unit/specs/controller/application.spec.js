@@ -1,6 +1,9 @@
+const { DappTransaction } = require('@liskhq/lisk-transactions');
+
 const _ = require('lodash');
 const Application = require('../../../../../src/controller/application');
 const validator = require('../../../../../src/controller/helpers/validator');
+const constants = require('../../../../../../framework/src/controller/schema/constants');
 const applicationSchema = require('../../../../../src/controller/schema/application');
 const constantsSchema = require('../../../../../src/controller/schema/constants');
 
@@ -45,9 +48,11 @@ const genesisBlock = require('../../../../fixtures/config/devnet/genesis_block')
 
 describe('Application', () => {
 	// Arrange
+	const frameworkTxTypes = ['0', '1', '2', '3', '4'];
 	const params = {
 		label: 'jest-unit',
 		genesisBlock,
+		constants,
 		config: [networkConfig, appConfig],
 	};
 
@@ -144,6 +149,19 @@ describe('Application', () => {
 			expect(app.controller).toBeNull();
 		});
 
+		it('should contain all framework related transactions.', () => {
+			// Act
+			const app = new Application(
+				params.label,
+				params.genesisBlock,
+				params.constants,
+				params.config
+			);
+
+			// Assert
+			expect(Object.keys(app.getTransactions())).toEqual(frameworkTxTypes);
+		});
+
 		it('should throw validation error if constants are overriden by the user', () => {
 			const customConfig = [
 				...[
@@ -161,6 +179,84 @@ describe('Application', () => {
 			expect(() => {
 				new Application(params.label, params.genesisBlock, customConfig);
 			}).toThrow('Schema validation error');
+		});
+	});
+
+	describe('#registerTransaction', () => {
+		it('should throw error when transaction type is missing.', () => {
+			// Arrange
+			const app = new Application(
+				params.label,
+				params.genesisBlock,
+				params.constants,
+				params.config
+			);
+
+			// Act && Assert
+			expect(() => app.registerTransaction()).toThrow(
+				'Transaction type is required as an integer'
+			);
+		});
+
+		it('should throw error when transaction type is not integer.', () => {
+			// Arrange
+			const app = new Application(
+				params.label,
+				params.genesisBlock,
+				params.constants,
+				params.config
+			);
+
+			// Act && Assert
+			expect(() => app.registerTransaction('5')).toThrow(
+				'Transaction type is required as an integer'
+			);
+		});
+
+		it('should throw error when transaction class is missing.', () => {
+			// Arrange
+			const app = new Application(
+				params.label,
+				params.genesisBlock,
+				params.constants,
+				params.config
+			);
+
+			// Act && Assert
+			expect(() => app.registerTransaction(5)).toThrow(
+				'Transaction implementation is required'
+			);
+		});
+
+		it('should throw error when transaction type is already registered.', () => {
+			// Arrange
+			const app = new Application(
+				params.label,
+				params.genesisBlock,
+				params.constants,
+				params.config
+			);
+
+			// Act && Assert
+			expect(() => app.registerTransaction(1, DappTransaction)).toThrow(
+				'A transaction type "1" is already registered.'
+			);
+		});
+
+		it('should register transaction when passing a new transaction type and a transaction implementation.', () => {
+			// Arrange
+			const app = new Application(
+				params.label,
+				params.genesisBlock,
+				params.constants,
+				params.config
+			);
+
+			// Act
+			app.registerTransaction(5, DappTransaction);
+
+			// Assert
+			expect(app.getTransaction(5)).toBe(DappTransaction);
 		});
 	});
 });
